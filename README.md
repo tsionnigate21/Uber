@@ -52,7 +52,7 @@ Trips Every Hour: Shows the trend of trips taken every hour.
     group_by(Date.Time) %>%
     summarize(Trips = n())
 ```
-<img src="Images/3.3 trips every hour.png" height = 250, width = 400>
+
 
 
 Trips Every Day of the Month: Visualizes the number of trips taken each day of the month.
@@ -63,7 +63,7 @@ daily_monthly_trips <- combined_data %>%
     group_by(Date, Month) %>%
     summarize(Trips = n())
 ```
-<img src="Images/3.4 day of month.png" height = 250, width = 400>
+
 
 
 Trips by Day and Month: Displays a bar chart of trips by day and month.
@@ -77,7 +77,7 @@ trips_by_day_month <- daily_monthly_trips %>%
     theme_minimal()
   print(trips_by_day_month)  
   ```
-<img src="Images/3.6 day of month.png" height = 250, width = 400>
+
 
 
 Trips by Bases and Month: Shows the distribution of trips by bases and month.
@@ -97,7 +97,7 @@ Heatmap of Uber Trips by Hour and Day: Presents a heatmap of trips by hour and d
     group_by(Day_of_Week, Hour) %>%
     summarize(Trips = n())
 ```
-<img src=" Images/4.1 hour& Day.png" height = 250, width = 400>
+
 
 
 Heatmap of Uber Trips by Month and Day: Displays a heatmap of trips by month and day.
@@ -108,7 +108,7 @@ day_month_group <- combined_data %>%
     group_by(Month, Day) %>%
     summarize(Trips = n())
 ```
-  <img src="Images/4.2 month& day.png" height = 250, width = 400>
+
 
   
 Heatmap of Uber Trips by Month and Week: Shows a heatmap of trips by month and week.
@@ -119,7 +119,7 @@ Heatmap of Uber Trips by Month and Week: Shows a heatmap of trips by month and w
     group_by(Month, Week) %>%
     summarize(Trips = n())
 ```
-  <img src=" " height = 250, width = 400>
+ 
 
   
 Heatmap of Uber Trips by Base and Day of Week: Presents a heatmap of trips by base and day of week.
