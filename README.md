@@ -22,28 +22,46 @@ This project uses R programming language along with various libraries such as `d
   combined_data$Date.Time <- as.POSIXct(combined_data$Date.Time, format = "%m/%d/%Y %H:%M:%S")
 ```
 # Data Analysis 
-- The analysis explores Uber trip data to gain insights into patterns of usage over time. The transformed data is then used to create several visualizations including a bar graph of trips by hour, a bar graph of trips by hour and month, a bar graph of trips by day, and a bar graph of trips by day and month. These visualizations provide an understanding of when Uber is most frequently used and how usage patterns vary by day, hour, and month.
+- Interactive controls to filter data by day of the week and month.
+```
+ h3("Controls"),
+      checkboxGroupInput("dayOfWeekSelector", "Select Days of the Week:",
+```
+- Visualizations including line graphs, bar charts, and heatmaps.
+  
+- Geospatial mapping of trip densities using Leaflet.
+  
+- Tables displaying trip data per day.
+  
+- The analysis explores Uber trip data to gain insights into patterns of usage over time. The transformed data is then used to create
+
+- several visualizations including a bar graph of trips by hour, a bar graph of trips by hour and month, a bar graph of trips by day, and a bar graph of trips by day and month. These visualizations provide an understanding of when Uber is most frequently used and how usage patterns vary by day, hour, and month.
 
 ## Usage
 The Shiny app provides various tabs for different visualizations and analyses of Uber trips data:
+Define server
+
+```
+server <- function(input, output) {
+  # Reactive expression to load data
+  data <- reactive({
+    rds_path <- "~/Documents/DATA/Data 332/files given/Uber data"
+    uber_data_files <- paste0("uber-raw-data-", c("apr14", "may14", "jun14", "jul14", "aug14", "sep14"), ".csv")
+    full_paths <- file.path(rds_path, uber_data_files)
+```
 Hourly Trips: Visualizes the number of trips by hour.
 ```
- hourly_trips <- combined_data %>%
-    mutate(Hour = format(Date.Time, format = "%H")) %>%
-    group_by(Hour) %>%
-    summarize(Trips = n())
-  print(hourly_trips)
+ output$hourly_trips_month_plot <- renderPlot({
+    hourly_trips_month <- data() %>%
+      mutate(Hour = format(`Date/Time`, "%H"),
+             Month = format(`Date/Time`, "%m")) %>%
 ```
 Hourly Trips by Month: Displays a line chart of trips by hour and month.
 ```
 hourly_trips_month <- combined_data %>%
     mutate(Hour = format(Date.Time, format = "%H"),
            Month = format(Date.Time, format = "%m")) %>%
-    group_by(Month, Hour) %>%
-    summarize(Trips = n()) %>%
-    ggplot(aes(x = Hour, y = Trips, color = Month)) +
-    geom_line() +
-    labs(title = "Trips by Hour and Month")
+   
 ```
 
 Trips Every Hour: Shows the trend of trips taken every hour.
@@ -60,8 +78,7 @@ Trips Every Day of the Month: Visualizes the number of trips taken each day of t
 daily_monthly_trips <- combined_data %>%
     mutate(Date = as.Date(Date.Time),  # Extract date from Date.Time
            Month = format(Date.Time, "%m")) %>%  # Extract month from Date.Time
-    group_by(Date, Month) %>%
-    summarize(Trips = n())
+
 ```
 
 
@@ -71,11 +88,7 @@ Trips by Day and Month: Displays a bar chart of trips by day and month.
 trips_by_day_month <- daily_monthly_trips %>%
     mutate(Date = as.Date(Date)) %>%
     mutate(Weekday = weekdays(Date)) %>%
-    ggplot(aes(x = Month, y = Trips, fill = Weekday)) +
-    geom_bar(stat = "identity", position = "dodge") +
-    labs(title = "Trips by Day and Month", x = "Month", y = "Number of Trips", fill = "Day of Week") +
-    theme_minimal()
-  print(trips_by_day_month)  
+    
   ```
 
 
@@ -171,14 +184,6 @@ Trips byBase and day of the week:
       )
   })
 }
-```
- <img src="Images/heatmap.png" height = 250, width = 400>
-
- 
-## Define server
-
-```
-server <- function(input, output) {
 ```
 
 ## Run the app
