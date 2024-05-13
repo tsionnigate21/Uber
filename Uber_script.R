@@ -13,7 +13,13 @@ ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
       h3("Controls"),
-      p("Interactive controls can be added here if needed.")
+      checkboxGroupInput("dayOfWeekSelector", "Select Days of the Week:",
+                         choices = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"),
+                         selected = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")),
+      selectInput("monthSelector", "Select Month:",
+                  choices = c("All", "April", "May", "June", "July", "August", "September"),
+                  selected = "All"),
+      p("")
     ),
     mainPanel(
       tabsetPanel(
@@ -27,9 +33,11 @@ ui <- fluidPage(
                  plotOutput("heatmap_month_day"),
                  plotOutput("heatmap_month_week"),
                  plotOutput("heatmap_base_day")
+                 
         ),
         tabPanel("Data Tables",
                  tableOutput("trips_every_day")
+                 
         ),
         tabPanel("Geospatial Map",
                  leafletOutput("leaflet_map")
@@ -64,7 +72,7 @@ server <- function(input, output) {
              Month = format(`Date/Time`, "%m")) %>%
       group_by(Month, Hour) %>%
       summarize(Trips = n()) %>%
-      ungroup() 
+      ungroup()
     ggplot(hourly_trips_month, aes(x = Hour, y = Trips, color = Month)) +
       geom_line() +
       labs(title = "Trips by Hour and Month", x = "Hour", y = "Trips")
@@ -98,7 +106,7 @@ server <- function(input, output) {
     daily_trips_table <- data() %>%
       mutate(Date = as.Date(`Date/Time`)) %>%
       group_by(Date) %>%
-      summarize(Trips = sum(Trips))
+      summarize(Trips = n())  # Counting the number of trips per day
     daily_trips_table
   })
   
@@ -194,6 +202,31 @@ server <- function(input, output) {
       addTiles() %>%
       addHeatmap(lng = ~Lon, lat = ~Lat, intensity = ~Count, radius = 20) %>%
       addLegend(position = "bottomright", pal = colorNumeric(palette = "viridis", domain = heatmap_data$Count), values = heatmap_data$Count, title = "Number of Trips")
+  })
+  # Analyze common days with higher trips
+  output$common_days_high_trips_plot <- renderPlot({
+    high_trip_days <- data() %>%
+      mutate(Date = as.Date(`Date/Time`)) %>%
+      group_by(Date) %>%
+      summarize(Trips = n()) %>%
+      ungroup() %>%
+      arrange(desc(Trips)) %>%
+      top_n(10, Trips)  # Top 10 days with the highest number of trips
+    ggplot(high_trip_days, aes(x = reorder(Date, Trips), y = Trips, fill = Trips)) +
+      geom_col(show.legend = FALSE) +
+      labs(title = "Top 10 Days with Highest Trips", x = "Date", y = "Number of Trips") +
+      theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  })
+  
+  output$common_days_high_trips_table <- renderTable({
+    high_trip_days <- data() %>%
+      mutate(Date = as.Date(`Date/Time`)) %>%
+      group_by(Date) %>%
+      summarize(Trips = n()) %>%
+      ungroup() %>%
+      arrange(desc(Trips)) %>%
+      top_n(10, Trips)  # Top 10 days with the highest number of trips
+    high_trip_days
   })
 }
 
